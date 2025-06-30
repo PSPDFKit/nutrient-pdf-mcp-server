@@ -48,19 +48,19 @@ class TestPDFMCPServer:
     async def test_handle_resolve_indirect_object_missing_params(self, server):
         """Test resolve_indirect_object with missing parameters."""
         # Missing pdf_path
-        arguments = {"object_id": "1-0"}
+        arguments = {"objnum": 1}
         with pytest.raises(ValueError, match="pdf_path is required"):
             await server._handle_resolve_indirect_object(arguments)
 
-        # Missing object_id
+        # Missing objnum
         arguments = {"pdf_path": "test.pdf"}
-        with pytest.raises(ValueError, match="object_id is required"):
+        with pytest.raises(ValueError, match="objnum is required"):
             await server._handle_resolve_indirect_object(arguments)
 
     @pytest.mark.asyncio
     async def test_handle_resolve_indirect_object_nonexistent_file(self, server):
         """Test resolve_indirect_object with nonexistent file."""
-        arguments = {"pdf_path": "nonexistent.pdf", "object_id": "1-0"}
+        arguments = {"pdf_path": "nonexistent.pdf", "objnum": 1, "gennum": 0}
 
         with pytest.raises(FileNotFoundError, match="PDF file not found"):
             await server._handle_resolve_indirect_object(arguments)
@@ -118,11 +118,13 @@ class TestPDFMCPServer:
         get_data = json.loads(get_result[0].text)
 
         if get_data["result"]["type"] == "indirect_ref":
-            object_id = get_data["result"]["id"]
+            objnum = get_data["result"]["objnum"]
+            gennum = get_data["result"]["gennum"] or 0
 
             arguments = {
                 "pdf_path": str(sample_pdf_path),
-                "object_id": object_id,
+                "objnum": objnum,
+                "gennum": gennum,
                 "depth": "shallow",
             }
 
@@ -135,7 +137,7 @@ class TestPDFMCPServer:
             response_data = json.loads(result[0].text)
             assert "object_id" in response_data
             assert "content" in response_data
-            assert response_data["object_id"] == object_id
+            assert response_data["object_id"] == f"{objnum}-{gennum}"
 
     @pytest.mark.asyncio
     async def test_error_handling_pdf_parsing_error(self, server, tmp_path):
@@ -161,9 +163,11 @@ class TestPDFMCPServer:
         temp_file.write_text("fake pdf content")
 
         with patch.object(server.parser, "resolve_object") as mock_resolve:
-            mock_resolve.side_effect = InvalidObjectIDError("Invalid format", "Expected 1-0")
+            mock_resolve.side_effect = InvalidObjectIDError(
+                "Invalid format", "Expected objnum as integer"
+            )
 
-            arguments = {"pdf_path": str(temp_file), "object_id": "invalid"}
+            arguments = {"pdf_path": str(temp_file), "objnum": 1, "gennum": 0}
 
             # The exception should be raised since _handle methods don't catch
             with pytest.raises(InvalidObjectIDError):

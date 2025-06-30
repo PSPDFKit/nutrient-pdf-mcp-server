@@ -1,6 +1,8 @@
 # Nutrient PDF MCP Server
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for investigating PDF object trees with lazy loading support, powered by Nutrient. This tool allows LLMs to efficiently explore PDF document structure without overwhelming token limits.
+> **A powerful Model Context Protocol server for LLM-driven PDF document analysis and exploration**
+
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for investigating PDF object trees with lazy loading support. This tool allows LLMs to efficiently explore PDF document structure without overwhelming token limits.
 
 ## Features
 
@@ -12,72 +14,28 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for inv
 
 ## Installation
 
-### From Source
+### Quick Start
 
 ```bash
 git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
 cd nutrient-pdf-mcp-server
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -e .
+make install-dev  # Sets up development environment
 ```
 
-### For Development
+### For Claude Code CLI
 
+**Recommended: Build and Install**
 ```bash
-pip install -e ".[dev]"
-```
-
-## Usage
-
-### As MCP Server
-
-#### Using Claude Code CLI
-
-**Option 1: Build and Install Locally (Recommended)**
-```bash
-# Clone and build
-git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
-cd nutrient-pdf-mcp-server
-pip install build  # Install build tools
-python -m build
+pip install build
+make build
 pipx install dist/nutrient_pdf_mcp-1.0.0-py3-none-any.whl
-
-# Add to Claude
 claude mcp add nutrient-pdf-mcp nutrient-pdf-mcp
 ```
 
-**Option 2: Development with Absolute Path**
+**Development Mode**
 ```bash
-# Clone and set up venv
-git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
-cd nutrient-pdf-mcp-server
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -e .
-
-# Add to Claude with absolute path
+make install-dev
 claude mcp add nutrient-pdf-mcp "$(pwd)/venv/bin/python" -m pdf_mcp.server
-```
-
-**Option 3: User Install (Simpler)**
-```bash
-# Clone and install in user space
-git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
-cd nutrient-pdf-mcp-server
-pip install --user -e .
-
-# Add to Claude
-claude mcp add nutrient-pdf-mcp python -m pdf_mcp.server
-```
-
-**Option 4: When Published to PyPI (Future)**
-```bash
-# Install with pipx (recommended for CLI tools)
-pipx install nutrient-pdf-mcp
-
-# Or using UV (most modern)
-claude mcp add nutrient-pdf-mcp uvx nutrient-pdf-mcp
 ```
 
 #### Manual Configuration
@@ -123,18 +81,20 @@ Nutrient PDF MCP Server - Get JSON representation of PDF object tree with lazy l
 
 #### `resolve_indirect_object`
 
-Nutrient PDF MCP Server - Resolve a specific indirect object by its ID.
+Nutrient PDF MCP Server - Resolve a specific indirect object by its object and generation numbers.
 
 **Parameters:**
 - `pdf_path` (required): Path to the PDF file
-- `object_id` (required): Indirect object ID to resolve (e.g., '1-0')
+- `objnum` (required): PDF object number (e.g., 3)
+- `gennum` (optional): PDF generation number (defaults to 0)
 - `depth` (optional): Resolution depth - 'shallow' (default) or 'deep'
 
 **Examples:**
 ```json
 {
   "pdf_path": "document.pdf",
-  "object_id": "3-0",
+  "objnum": 3,
+  "gennum": 0,
   "depth": "shallow"
 }
 ```
@@ -142,14 +102,11 @@ Nutrient PDF MCP Server - Resolve a specific indirect object by its ID.
 ### Command Line Usage
 
 ```bash
-# Activate virtual environment
-source venv/bin/activate
+# Run the server
+make serve
 
-# Run the Nutrient PDF MCP Server
-nutrient-pdf-mcp
-
-# Or run manually
-python -m pdf_mcp.server
+# Or run with debug logging
+make serve-debug
 ```
 
 ## Architecture
@@ -173,7 +130,7 @@ All PDF objects are serialized into a consistent JSON format:
     "/Kids": {
       "type": "array", 
       "value": [
-        {"type": "indirect_ref", "id": "2-0"}
+        {"type": "indirect_ref", "objnum": 2, "gennum": 0}
       ]
     }
   }
@@ -194,8 +151,8 @@ The lazy loading system provides massive token savings:
 
 1. **Get overview**: `get_pdf_object_tree(path="document.pdf", mode="lazy")`
 2. **Navigate to pages**: `get_pdf_object_tree(path="document.pdf", path="Pages", mode="lazy")`
-3. **Resolve specific page**: `resolve_indirect_object(object_id="3-0", depth="shallow")`
-4. **Deep dive when needed**: `resolve_indirect_object(object_id="3-0", depth="deep")`
+3. **Resolve specific page**: `resolve_indirect_object(objnum=3, gennum=0, depth="shallow")`
+4. **Deep dive when needed**: `resolve_indirect_object(objnum=3, gennum=0, depth="deep")`
 
 ### Path Navigation Examples
 
@@ -206,21 +163,20 @@ The lazy loading system provides massive token savings:
 
 ## Development
 
-### Code Quality
+### Quick Start
 
 ```bash
-# Format code
-black .
-isort .
+# Set up development environment
+make install-dev
 
-# Type checking
-mypy pdf_mcp/
+# Run all quality checks (format, lint, typecheck, test)
+make quality
 
-# Linting
-ruff check .
-
-# Run tests
-pytest
+# Or run individual commands
+make test          # Run tests
+make format        # Format code
+make lint          # Run linter
+make typecheck     # Type checking
 ```
 
 ### Project Structure
@@ -241,14 +197,9 @@ nutrient-pdf-mcp-server/
 
 ## Publishing to PyPI
 
-To publish this package to PyPI:
-
 ```bash
-# Install build tools
-pip install build twine
-
 # Build the package
-python -m build
+make build
 
 # Upload to test PyPI first
 twine upload --repository testpypi dist/*

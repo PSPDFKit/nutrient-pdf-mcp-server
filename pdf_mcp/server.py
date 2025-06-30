@@ -72,9 +72,14 @@ class PDFMCPServer:
                         "type": "object",
                         "properties": {
                             "pdf_path": {"type": "string", "description": "Path to the PDF file"},
-                            "object_id": {
-                                "type": "string",
-                                "description": "Indirect object ID to resolve (e.g., '1-0')",
+                            "objnum": {
+                                "type": "integer",
+                                "description": "PDF object number",
+                            },
+                            "gennum": {
+                                "type": "integer",
+                                "description": "PDF generation number (optional, defaults to 0)",
+                                "default": 0,
                             },
                             "depth": {
                                 "type": "string",
@@ -83,7 +88,7 @@ class PDFMCPServer:
                                 "default": "shallow",
                             },
                         },
-                        "required": ["pdf_path", "object_id"],
+                        "required": ["pdf_path", "objnum"],
                     },
                 ),
             ]
@@ -137,21 +142,22 @@ class PDFMCPServer:
     ) -> list[types.TextContent]:
         """Handle resolve_indirect_object tool calls."""
         pdf_path = arguments.get("pdf_path")
-        object_id = arguments.get("object_id")
+        objnum = arguments.get("objnum")
+        gennum = arguments.get("gennum", 0)
         depth = arguments.get("depth", "shallow")
 
         if not pdf_path:
             raise ValueError("pdf_path is required")
-        if not object_id:
-            raise ValueError("object_id is required")
+        if objnum is None:
+            raise ValueError("objnum is required")
 
         path = Path(pdf_path)
         if not path.exists():
             raise FileNotFoundError(f"PDF file not found: {pdf_path}")
 
-        logger.info(f"Resolving object {object_id} from {pdf_path} with {depth} depth")
+        logger.info(f"Resolving object {objnum}-{gennum} from {pdf_path} with {depth} depth")
 
-        result = self.parser.resolve_object(str(path), object_id, depth)
+        result = self.parser.resolve_object(str(path), objnum, gennum, depth)
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
