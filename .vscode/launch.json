@@ -1,0 +1,46 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run PDF MCP Server",
+            "type": "python",
+            "request": "launch",
+            "module": "pdf_mcp.server",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "Test Parser with Sample PDF",
+            "type": "python",
+            "request": "launch",
+            "module": "pdf_mcp.parser",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "args": ["res/document.pdf"],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "Run Tests",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "args": ["tests/", "-v"]
+        },
+        {
+            "name": "Run Tests with Coverage",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "args": ["--cov=pdf_mcp", "--cov-report=term-missing", "--cov-report=html", "tests/"]
+        }
+    ]
+}
