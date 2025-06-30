@@ -25,7 +25,7 @@ class TestIntegration:
     @pytest.fixture
     def sample_pdf_path(self):
         """Path to sample PDF."""
-        return Path("res/document.pdf")
+        return Path("tests/fixtures/document.pdf")
 
     @pytest.mark.integration
     @pytest.mark.slow

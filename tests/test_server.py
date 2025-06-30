@@ -21,7 +21,7 @@ class TestPDFMCPServer:
     @pytest.fixture
     def sample_pdf_path(self):
         """Path to sample PDF."""
-        return Path("res/document.pdf")
+        return Path("tests/fixtures/document.pdf")
 
     def test_server_initialization(self, server):
         """Test server initializes correctly."""

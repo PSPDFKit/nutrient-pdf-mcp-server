@@ -19,7 +19,7 @@ class TestPDFObjectTreeParser:
     @pytest.fixture
     def sample_pdf_path(self):
         """Path to sample PDF (you'll need to add this)."""
-        return Path("res/document.pdf")
+        return Path("tests/fixtures/document.pdf")
 
     def test_parser_initialization(self, parser):
         """Test parser initializes correctly."""
