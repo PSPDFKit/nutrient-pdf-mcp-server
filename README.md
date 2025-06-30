@@ -14,72 +14,28 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for inv
 
 ## Installation
 
-### From Source
+### Quick Start
 
 ```bash
 git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
 cd nutrient-pdf-mcp-server
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -e .
+make install-dev  # Sets up development environment
 ```
 
-### For Development
+### For Claude Code CLI
 
+**Recommended: Build and Install**
 ```bash
-pip install -e ".[dev]"
-```
-
-## Usage
-
-### As MCP Server
-
-#### Using Claude Code CLI
-
-**Option 1: Build and Install Locally (Recommended)**
-```bash
-# Clone and build
-git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
-cd nutrient-pdf-mcp-server
-pip install build  # Install build tools
-python -m build
+pip install build
+make build
 pipx install dist/nutrient_pdf_mcp-1.0.0-py3-none-any.whl
-
-# Add to Claude
 claude mcp add nutrient-pdf-mcp nutrient-pdf-mcp
 ```
 
-**Option 2: Development with Absolute Path**
+**Development Mode**
 ```bash
-# Clone and set up venv
-git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
-cd nutrient-pdf-mcp-server
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -e .
-
-# Add to Claude with absolute path
+make install-dev
 claude mcp add nutrient-pdf-mcp "$(pwd)/venv/bin/python" -m pdf_mcp.server
-```
-
-**Option 3: User Install (Simpler)**
-```bash
-# Clone and install in user space
-git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
-cd nutrient-pdf-mcp-server
-pip install --user -e .
-
-# Add to Claude
-claude mcp add nutrient-pdf-mcp python -m pdf_mcp.server
-```
-
-**Option 4: When Published to PyPI (Future)**
-```bash
-# Install with pipx (recommended for CLI tools)
-pipx install nutrient-pdf-mcp
-
-# Or using UV (most modern)
-claude mcp add nutrient-pdf-mcp uvx nutrient-pdf-mcp
 ```
 
 #### Manual Configuration
@@ -146,14 +102,11 @@ Nutrient PDF MCP Server - Resolve a specific indirect object by its object and g
 ### Command Line Usage
 
 ```bash
-# Activate virtual environment
-source venv/bin/activate
+# Run the server
+make serve
 
-# Run the Nutrient PDF MCP Server
-nutrient-pdf-mcp
-
-# Or run manually
-python -m pdf_mcp.server
+# Or run with debug logging
+make serve-debug
 ```
 
 ## Architecture
@@ -210,21 +163,20 @@ The lazy loading system provides massive token savings:
 
 ## Development
 
-### Code Quality
+### Quick Start
 
 ```bash
-# Format code
-black .
-isort .
+# Set up development environment
+make install-dev
 
-# Type checking
-mypy pdf_mcp/
+# Run all quality checks (format, lint, typecheck, test)
+make quality
 
-# Linting
-ruff check .
-
-# Run tests
-pytest
+# Or run individual commands
+make test          # Run tests
+make format        # Format code
+make lint          # Run linter
+make typecheck     # Type checking
 ```
 
 ### Project Structure
@@ -245,14 +197,9 @@ nutrient-pdf-mcp-server/
 
 ## Publishing to PyPI
 
-To publish this package to PyPI:
-
 ```bash
-# Install build tools
-pip install build twine
-
 # Build the package
-python -m build
+make build
 
 # Upload to test PyPI first
 twine upload --repository testpypi dist/*
