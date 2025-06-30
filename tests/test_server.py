@@ -191,7 +191,7 @@ class TestPDFMCPServer:
 
         server = create_server()
         assert isinstance(server, PDFMCPServer)
-        assert server.server.name == "pdf-mcp"
+        assert server.server.name == "nutrient-pdf-mcp"
 
 
 if __name__ == "__main__":

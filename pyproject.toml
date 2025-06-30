@@ -7,14 +7,13 @@ name = "nutrient-pdf-mcp"
 version = "1.0.0"
 description = "Nutrient PDF MCP Server - Advanced PDF object tree investigation with lazy loading support"
 authors = [{name = "Nutrient", email = "info@nutrient.io"}]
-license = {text = "MIT"}
+license = "MIT"
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["pdf", "mcp", "model-context-protocol", "document-analysis", "nutrient"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
