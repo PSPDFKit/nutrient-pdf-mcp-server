@@ -1,6 +1,8 @@
 # Nutrient PDF MCP Server
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for investigating PDF object trees with lazy loading support, powered by Nutrient. This tool allows LLMs to efficiently explore PDF document structure without overwhelming token limits.
+> **A powerful Model Context Protocol server for LLM-driven PDF document analysis and exploration**
+
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for investigating PDF object trees with lazy loading support. This tool allows LLMs to efficiently explore PDF document structure without overwhelming token limits.
 
 ## Features
 
@@ -123,18 +125,20 @@ Nutrient PDF MCP Server - Get JSON representation of PDF object tree with lazy l
 
 #### `resolve_indirect_object`
 
-Nutrient PDF MCP Server - Resolve a specific indirect object by its ID.
+Nutrient PDF MCP Server - Resolve a specific indirect object by its object and generation numbers.
 
 **Parameters:**
 - `pdf_path` (required): Path to the PDF file
-- `object_id` (required): Indirect object ID to resolve (e.g., '1-0')
+- `objnum` (required): PDF object number (e.g., 3)
+- `gennum` (optional): PDF generation number (defaults to 0)
 - `depth` (optional): Resolution depth - 'shallow' (default) or 'deep'
 
 **Examples:**
 ```json
 {
   "pdf_path": "document.pdf",
-  "object_id": "3-0",
+  "objnum": 3,
+  "gennum": 0,
   "depth": "shallow"
 }
 ```
@@ -173,7 +177,7 @@ All PDF objects are serialized into a consistent JSON format:
     "/Kids": {
       "type": "array", 
       "value": [
-        {"type": "indirect_ref", "id": "2-0"}
+        {"type": "indirect_ref", "objnum": 2, "gennum": 0}
       ]
     }
   }
@@ -194,8 +198,8 @@ The lazy loading system provides massive token savings:
 
 1. **Get overview**: `get_pdf_object_tree(path="document.pdf", mode="lazy")`
 2. **Navigate to pages**: `get_pdf_object_tree(path="document.pdf", path="Pages", mode="lazy")`
-3. **Resolve specific page**: `resolve_indirect_object(object_id="3-0", depth="shallow")`
-4. **Deep dive when needed**: `resolve_indirect_object(object_id="3-0", depth="deep")`
+3. **Resolve specific page**: `resolve_indirect_object(objnum=3, gennum=0, depth="shallow")`
+4. **Deep dive when needed**: `resolve_indirect_object(objnum=3, gennum=0, depth="deep")`
 
 ### Path Navigation Examples
 

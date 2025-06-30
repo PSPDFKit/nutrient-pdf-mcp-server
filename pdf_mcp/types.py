@@ -36,7 +36,8 @@ class PDFNull(TypedDict):
 
 class PDFIndirectRef(TypedDict):
     type: Literal["indirect_ref"]
-    id: str
+    objnum: int
+    gennum: int | None
 
 
 class PDFArray(TypedDict):

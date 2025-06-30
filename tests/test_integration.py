@@ -43,13 +43,16 @@ class TestIntegration:
         assert "result" in pages_result
         assert pages_result["result"]["type"] == "indirect_ref"
 
-        pages_id = pages_result["result"]["id"]
+        pages_objnum = pages_result["result"]["objnum"]
+        pages_gennum = pages_result["result"]["gennum"] or 0
 
         # Step 3: Resolve Pages object (shallow)
-        pages_content = parser.resolve_object(str(sample_pdf_path), pages_id, "shallow")
+        pages_content = parser.resolve_object(
+            str(sample_pdf_path), pages_objnum, pages_gennum, "shallow"
+        )
         assert "object_id" in pages_content
         assert "content" in pages_content
-        assert pages_content["object_id"] == pages_id
+        assert pages_content["object_id"] == f"{pages_objnum}-{pages_gennum}"
 
         # Verify Pages object structure
         pages_dict = pages_content["content"]
@@ -65,10 +68,13 @@ class TestIntegration:
                 assert first_page_ref["type"] == "indirect_ref"
 
                 # Step 5: Resolve first page
-                first_page_id = first_page_ref["id"]
-                page_content = parser.resolve_object(str(sample_pdf_path), first_page_id, "shallow")
+                first_page_objnum = first_page_ref["objnum"]
+                first_page_gennum = first_page_ref["gennum"] or 0
+                page_content = parser.resolve_object(
+                    str(sample_pdf_path), first_page_objnum, first_page_gennum, "shallow"
+                )
 
-                assert page_content["object_id"] == first_page_id
+                assert page_content["object_id"] == f"{first_page_objnum}-{first_page_gennum}"
                 page_dict = page_content["content"]
                 assert page_dict["type"] == "dict"
                 assert "/Type" in page_dict["value"]
@@ -118,12 +124,14 @@ class TestIntegration:
         nav_data = json.loads(nav_result[0].text)
 
         if nav_data["result"]["type"] == "indirect_ref":
-            pages_id = nav_data["result"]["id"]
+            pages_objnum = nav_data["result"]["objnum"]
+            pages_gennum = nav_data["result"]["gennum"] or 0
 
             # Step 3: Resolve Pages object
             resolve_args = {
                 "pdf_path": str(sample_pdf_path),
-                "object_id": pages_id,
+                "objnum": pages_objnum,
+                "gennum": pages_gennum,
                 "depth": "shallow",
             }
             resolve_result = await server._handle_resolve_indirect_object(resolve_args)
@@ -131,7 +139,7 @@ class TestIntegration:
 
             assert "object_id" in resolve_data
             assert "content" in resolve_data
-            assert resolve_data["object_id"] == pages_id
+            assert resolve_data["object_id"] == f"{pages_objnum}-{pages_gennum}"
 
     @pytest.mark.integration
     def test_lazy_vs_full_comparison(self, parser, sample_pdf_path):
