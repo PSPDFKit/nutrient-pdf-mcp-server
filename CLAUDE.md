@@ -40,14 +40,46 @@ This is the Nutrient PDF MCP Server, a Model Context Protocol (MCP) server for i
 
 ## Usage Examples
 ```bash
-# Start Nutrient PDF MCP Server for Claude Code
-./run-pdf-mcp.sh
-
-# Manual testing
+# Start Nutrient PDF MCP Server for Claude Code (recommended)
 python -m pdf_mcp.server
 
 # Using the installed command
 nutrient-pdf-mcp
+
+```
+
+## Claude Code Integration
+
+**Current (Private Repo): Development setup**
+```bash
+# Clone and set up venv
+git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
+cd nutrient-pdf-mcp-server
+python -m venv venv
+source venv/bin/activate
+pip install -e .
+
+# Add to Claude
+claude mcp add nutrient-pdf-mcp ./venv/bin/python -m pdf_mcp.server
+```
+
+**Future (When public): Direct install**
+```bash
+# When published to PyPI
+pipx install nutrient-pdf-mcp
+claude mcp add nutrient-pdf-mcp nutrient-pdf-mcp
+```
+
+Alternative manual configuration:
+```json
+{
+  "mcpServers": {
+    "nutrient-pdf-mcp": {
+      "command": "python",
+      "args": ["-m", "pdf_mcp.server"]
+    }
+  }
+}
 ```
 
 ## Token Efficiency

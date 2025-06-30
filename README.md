@@ -32,11 +32,66 @@ pip install -e ".[dev]"
 
 ### As MCP Server
 
-Use with Claude Code or other MCP clients:
+#### Using Claude Code CLI
 
+**Option 1: Build and Install Locally (Recommended)**
 ```bash
-/path/to/nutrient-pdf-mcp-server/run-pdf-mcp.sh
+# Clone and build
+git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
+cd nutrient-pdf-mcp-server
+pip install build  # Install build tools
+python -m build
+pipx install dist/nutrient_pdf_mcp-1.0.0-py3-none-any.whl
+
+# Add to Claude
+claude mcp add nutrient-pdf-mcp nutrient-pdf-mcp
 ```
+
+**Option 2: Development with Absolute Path**
+```bash
+# Clone and set up venv
+git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
+cd nutrient-pdf-mcp-server
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -e .
+
+# Add to Claude with absolute path
+claude mcp add nutrient-pdf-mcp "$(pwd)/venv/bin/python" -m pdf_mcp.server
+```
+
+**Option 3: User Install (Simpler)**
+```bash
+# Clone and install in user space
+git clone https://github.com/PSPDFKit/nutrient-pdf-mcp-server.git
+cd nutrient-pdf-mcp-server
+pip install --user -e .
+
+# Add to Claude
+claude mcp add nutrient-pdf-mcp python -m pdf_mcp.server
+```
+
+**Option 4: When Published to PyPI (Future)**
+```bash
+# Install with pipx (recommended for CLI tools)
+pipx install nutrient-pdf-mcp
+
+# Or using UV (most modern)
+claude mcp add nutrient-pdf-mcp uvx nutrient-pdf-mcp
+```
+
+#### Manual Configuration
+```json
+{
+  "mcpServers": {
+    "nutrient-pdf-mcp": {
+      "command": "python",
+      "args": ["-m", "pdf_mcp.server"]
+    }
+  }
+}
+```
+
 
 ### Available Tools
 
@@ -181,8 +236,32 @@ nutrient-pdf-mcp-server/
 ├── tests/                 # Test suite
 ├── res/                   # Sample PDFs
 ├── pyproject.toml         # Project configuration
-├── README.md
-└── run-pdf-mcp.sh        # Launch script
+└── README.md
+```
+
+## Publishing to PyPI
+
+To publish this package to PyPI:
+
+```bash
+# Install build tools
+pip install build twine
+
+# Build the package
+python -m build
+
+# Upload to test PyPI first
+twine upload --repository testpypi dist/*
+
+# Upload to production PyPI
+twine upload dist/*
+```
+
+After publishing, users can install with:
+```bash
+pipx install nutrient-pdf-mcp
+# or
+pip install --user nutrient-pdf-mcp
 ```
 
 ## Contributing

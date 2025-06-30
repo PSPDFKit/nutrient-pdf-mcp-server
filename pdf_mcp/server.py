@@ -166,7 +166,7 @@ class PDFMCPServer:
                 InitializationOptions(
                     server_name="nutrient-pdf-mcp",
                     server_version="1.0.0",
-                    capabilities=ServerCapabilities(),
+                    capabilities=ServerCapabilities(tools=types.ToolsCapability()),
                 ),
             )
 
@@ -176,11 +176,16 @@ def create_server() -> PDFMCPServer:
     return PDFMCPServer()
 
 
-async def main() -> None:
-    """Main entry point for the Nutrient PDF MCP Server."""
+async def async_main() -> None:
+    """Async main entry point for the Nutrient PDF MCP Server."""
     server = create_server()
     await server.run()
 
 
+def main() -> None:
+    """Main entry point for the Nutrient PDF MCP Server."""
+    asyncio.run(async_main())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
