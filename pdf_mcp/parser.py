@@ -144,13 +144,14 @@ class PDFObjectTreeParser:
             raise PDFParsingError(f"Error parsing PDF: {e}") from e
 
     def resolve_object(
-        self, pdf_path: str | Path, object_id: str, depth: ResolutionDepth = "shallow"
+        self, pdf_path: str | Path, objnum: int, gennum: int = 0, depth: ResolutionDepth = "shallow"
     ) -> ShallowResolveResponse | DeepResolveResponse:
-        """Resolve a specific indirect object by its ID.
+        """Resolve a specific indirect object by its object and generation numbers.
 
         Args:
             pdf_path: Path to PDF file
-            object_id: Object ID in format "1-0"
+            objnum: PDF object number
+            gennum: PDF generation number (defaults to 0)
             depth: Resolution depth - "shallow" (only direct properties) or "deep" (resolve all nested)
 
         Returns:
@@ -158,7 +159,6 @@ class PDFObjectTreeParser:
 
         Raises:
             PDFParsingError: If PDF cannot be parsed
-            InvalidObjectIDError: If object_id has invalid format
             ObjectNotFoundError: If object is not found in PDF
         """
         pdf_path = Path(pdf_path)
@@ -170,32 +170,20 @@ class PDFObjectTreeParser:
             with open(pdf_path, "rb") as file:
                 reader = pypdf.PdfReader(file)
 
-                # Parse object ID (format: "1-0")
-                try:
-                    parts = object_id.split("-")
-                    if len(parts) != 2:
-                        raise InvalidObjectIDError(
-                            f"Invalid object ID format: {object_id}. Expected format: '1-0'"
-                        )
-
-                    obj_num, gen_num = int(parts[0]), int(parts[1])
-                except ValueError as e:
-                    raise InvalidObjectIDError(
-                        f"Invalid object ID format: {object_id}. Expected format: '1-0'"
-                    ) from e
-
                 # Create IndirectObject reference and resolve it
                 try:
-                    indirect_ref = IndirectObject(obj_num, gen_num, reader)
+                    indirect_ref = IndirectObject(objnum, gennum, reader)
                     actual_obj = indirect_ref.get_object()
                 except Exception as e:
                     raise ObjectNotFoundError(
-                        f"Object {object_id} not found in PDF", details=str(e)
+                        f"Object {objnum}-{gennum} not found in PDF", details=str(e)
                     ) from e
 
                 # Serialize the resolved object
                 self._reset_state(lazy_mode=(depth == "shallow"))
                 result = self._serialize_object(actual_obj)
+
+                object_id = f"{objnum}-{gennum}"
 
                 if depth == "shallow":
                     return ShallowResolveResponse(object_id=object_id, content=result)
@@ -204,11 +192,11 @@ class PDFObjectTreeParser:
                         object_id=object_id, content=result, indirect_objects=self.indirect_objects
                     )
 
-        except (PDFParsingError, InvalidObjectIDError, ObjectNotFoundError):
+        except (PDFParsingError, ObjectNotFoundError):
             raise
         except Exception as e:
-            logger.error(f"Failed to resolve object {object_id} in {pdf_path}: {e}")
-            raise PDFParsingError(f"Error resolving object {object_id}: {e}") from e
+            logger.error(f"Failed to resolve object {objnum}-{gennum} in {pdf_path}: {e}")
+            raise PDFParsingError(f"Error resolving object {objnum}-{gennum}: {e}") from e
 
     def _reset_state(self, lazy_mode: bool) -> None:
         """Reset parser state for a new operation."""
@@ -249,13 +237,15 @@ class PDFObjectTreeParser:
         """
         if isinstance(obj, IndirectObject):
             ref_id = f"{obj.idnum}-{obj.generation}"
+            objnum = obj.idnum
+            gennum = obj.generation if obj.generation != 0 else None
 
             if self.lazy_mode:
                 # In lazy mode, just return the reference without resolving
-                return {"type": "indirect_ref", "id": ref_id}
+                return {"type": "indirect_ref", "objnum": objnum, "gennum": gennum}
 
             if ref_id in self.visited_refs:
-                return {"type": "indirect_ref", "id": ref_id}
+                return {"type": "indirect_ref", "objnum": objnum, "gennum": gennum}
 
             self.visited_refs.add(ref_id)
 
@@ -266,7 +256,7 @@ class PDFObjectTreeParser:
             # Store in indirect_objects
             self.indirect_objects[ref_id] = serialized
 
-            return {"type": "indirect_ref", "id": ref_id}
+            return {"type": "indirect_ref", "objnum": objnum, "gennum": gennum}
 
         elif isinstance(obj, DictionaryObject):
             result = {"type": "dict", "value": {}}
@@ -363,19 +353,17 @@ class PDFObjectTreeParser:
         """
         # If this is an indirect reference, resolve it first
         if isinstance(obj, dict) and obj.get("type") == "indirect_ref":
-            ref_id = obj["id"]
+            objnum = obj["objnum"]
+            gennum = obj.get("gennum", 0)
+            ref_id = f"{objnum}-{gennum}"
+
             if ref_id in self.indirect_objects:
                 obj = self.indirect_objects[ref_id]
             else:
                 # Need to resolve the reference
-                parts = ref_id.split("-")
-                if len(parts) == 2:
-                    obj_num, gen_num = int(parts[0]), int(parts[1])
-                    indirect_ref = IndirectObject(obj_num, gen_num, reader)
-                    actual_obj = indirect_ref.get_object()
-                    obj = self._serialize_object(actual_obj)
-                else:
-                    raise InvalidPathError(f"Invalid indirect reference format: {ref_id}")
+                indirect_ref = IndirectObject(objnum, gennum, reader)
+                actual_obj = indirect_ref.get_object()
+                obj = self._serialize_object(actual_obj)
 
         # Handle dictionary navigation
         if isinstance(obj, dict) and obj.get("type") == "dict":
