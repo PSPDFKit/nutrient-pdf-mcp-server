@@ -1,5 +1,9 @@
 # PDF MCP Development Tasks
 
+# Auto-detect python and pip commands
+PYTHON := $(shell command -v python3 2> /dev/null || command -v python 2> /dev/null || echo "python")
+PIP := $(shell command -v pip3 2> /dev/null || command -v pip 2> /dev/null || echo "pip")
+
 .PHONY: help install install-dev test test-unit test-integration test-cov lint format typecheck quality clean build serve
 
 # Default target
@@ -16,10 +20,10 @@ help: ## Show this help message
 
 # Installation
 install: ## Install package in production mode
-	pip install .
+	$(PIP) install .
 
 install-dev: ## Install package in development mode with all dependencies
-	pip install -e ".[dev]"
+	$(PIP) install -e ".[dev]"
 
 # Testing
 test: ## Run all tests
@@ -88,15 +92,15 @@ quality-fix: ## Run quality checks and fix what can be auto-fixed
 
 # Development
 serve: ## Start the MCP server for development
-	python -m pdf_mcp.server
+	$(PYTHON) -m pdf_mcp.server
 
 serve-debug: ## Start the MCP server with debug logging
-	PYTHONPATH=. python -c "import logging; logging.basicConfig(level=logging.DEBUG); from pdf_mcp.server import main; import asyncio; asyncio.run(main())"
+	PYTHONPATH=. $(PYTHON) -c "import logging; logging.basicConfig(level=logging.DEBUG); from pdf_mcp.server import main; import asyncio; asyncio.run(main())"
 
 # Testing with specific PDFs
 test-sample: ## Test with sample PDF (requires res/document.pdf)
-	python test_direct.py res/document.pdf lazy
-	python test_direct.py res/document.pdf resolve "3-0" shallow
+	$(PYTHON) test_direct.py res/document.pdf lazy
+	$(PYTHON) test_direct.py res/document.pdf resolve "3-0" shallow
 
 # Utilities
 clean: ## Clean up build artifacts and cache
@@ -111,7 +115,7 @@ clean: ## Clean up build artifacts and cache
 	find . -type f -name "*.pyc" -delete
 
 build: ## Build distribution packages
-	python -m build
+	$(PYTHON) -m build
 
 # Development workflow helpers
 dev-setup: install-dev ## Complete development environment setup
