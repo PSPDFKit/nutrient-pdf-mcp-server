@@ -2,6 +2,12 @@
 
 > **A powerful Model Context Protocol server for LLM-driven PDF document analysis and exploration**
 
+> **Positioning note**
+> This server is for **low-level PDF object tree exploration/debugging**.
+> If you want high-level document workflows (convert/OCR/redact/sign/extract), use:
+> - [Nutrient DWS MCP Server](https://github.com/PSPDFKit/nutrient-dws-mcp-server) (cloud)
+> - [Nutrient Document Engine MCP Server](https://github.com/PSPDFKit/nutrient-document-engine-mcp-server) (self-hosted)
+
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for investigating PDF object trees with lazy loading support. This tool allows LLMs to efficiently explore PDF document structure without overwhelming token limits.
 
 ## Features
