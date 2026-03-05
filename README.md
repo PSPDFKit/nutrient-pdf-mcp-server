@@ -2,11 +2,18 @@
 
 > **A powerful Model Context Protocol server for LLM-driven PDF document analysis and exploration**
 
-> **Positioning note**
-> This server is for **low-level PDF object tree exploration/debugging**.
-> If you want high-level document workflows (convert/OCR/redact/sign/extract), use:
-> - [Nutrient DWS MCP Server](https://github.com/PSPDFKit/nutrient-dws-mcp-server) (cloud)
-> - [Nutrient Document Engine MCP Server](https://github.com/PSPDFKit/nutrient-document-engine-mcp-server) (self-hosted)
+## Which MCP Server Should I Use?
+
+| Server | Best for | Deployment | Core capabilities |
+|---|---|---|---|
+| [Nutrient DWS MCP Server](https://github.com/PSPDFKit/nutrient-dws-mcp-server) | Cloud document workflows | Nutrient-hosted API (API key) | Convert, OCR, redact, sign, extract, watermark, automation |
+| [Nutrient Document Engine MCP Server](https://github.com/PSPDFKit/nutrient-document-engine-mcp-server) | Self-hosted document workflows | On-prem/private cloud | Document processing with deployment control and data residency |
+| [Nutrient PDF MCP Server](https://github.com/PSPDFKit/nutrient-pdf-mcp-server) | Low-level PDF inspection/debugging | Local Python runtime | Object-tree exploration, indirect-object resolution, structural analysis |
+
+You are in the **PDF MCP Server** repo. Choose this when you need low-level PDF object-tree inspection/debugging rather than end-to-end workflow automation.
+
+- Ecosystem overview: [Nutrient AI Infrastructure](https://www.nutrient.io/ai/infrastructure/)
+- Product landing page: [Nutrient MCP Server](https://www.nutrient.io/mcp-server-pdf-automation-llm/)
 
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for investigating PDF object trees with lazy loading support. This tool allows LLMs to efficiently explore PDF document structure without overwhelming token limits.
 
