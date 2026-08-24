@@ -36,7 +36,7 @@ class PDFMCPServer:
     def _setup_handlers(self) -> None:
         """Set up MCP server handlers."""
 
-        @self.server.list_tools()  # type: ignore[misc]
+        @self.server.list_tools()  # type: ignore[untyped-decorator]
         async def handle_list_tools() -> list[types.Tool]:
             """List available tools."""
             return [
@@ -93,7 +93,7 @@ class PDFMCPServer:
                 ),
             ]
 
-        @self.server.call_tool()  # type: ignore[misc]
+        @self.server.call_tool()  # type: ignore[untyped-decorator]
         async def handle_call_tool(name: str, arguments: dict[str, Any]) -> list[types.TextContent]:
             """Handle tool calls."""
             try:
