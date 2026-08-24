@@ -56,6 +56,8 @@ cd nutrient-pdf-mcp-server
 make install-dev  # Sets up development environment
 ```
 
+This release requires `mcp>=1.0.0,<2`; MCP 2.x is not yet compatible.
+
 ### For Claude Code CLI
 
 **Recommended: Build and Install**
