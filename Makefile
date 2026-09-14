@@ -4,7 +4,7 @@
 PYTHON := $(shell command -v python3 2> /dev/null || command -v python 2> /dev/null || echo "python")
 PIP := $(shell command -v pip3 2> /dev/null || command -v pip 2> /dev/null || echo "pip")
 
-.PHONY: help install install-dev test test-unit test-integration test-cov lint format typecheck quality clean build serve
+.PHONY: help install install-dev test test-unit test-integration test-cov lint format typecheck quality clean build smoke serve
 
 # Default target
 help: ## Show this help message
@@ -116,6 +116,16 @@ clean: ## Clean up build artifacts and cache
 
 build: ## Build distribution packages
 	$(PYTHON) -m build
+
+smoke: ## Build and smoke-test the installed wheel over MCP stdio
+	rm -rf build/smoke
+	mkdir -p build/smoke/wheel
+	$(PYTHON) -m build --wheel --outdir build/smoke/wheel
+	$(PYTHON) -m venv build/smoke/venv
+	@wheel="$$(find build/smoke/wheel -maxdepth 1 -type f -name '*.whl')"; \
+		test "$$(printf '%s\n' "$$wheel" | sed '/^$$/d' | wc -l | tr -d ' ')" = "1"; \
+		build/smoke/venv/bin/python -m pip install --disable-pip-version-check "$$wheel"
+	$(PYTHON) scripts/smoke_mcp.py build/smoke/venv/bin/nutrient-pdf-mcp
 
 # Development workflow helpers
 dev-setup: install-dev ## Complete development environment setup

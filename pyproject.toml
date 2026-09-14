@@ -23,7 +23,7 @@ classifiers = [
     "Topic :: Multimedia :: Graphics :: Graphics Conversion",
 ]
 dependencies = [
-    "mcp>=1.0.0",
+    "mcp>=1.0.0,<2",
     "pypdf>=4.0.0",
     "typing-extensions>=4.0.0",
     "cryptography>=3.1",
